@@ -10,23 +10,42 @@ class InventoryButtonComponent extends InterfaceComponent {
           id: 3,
           position: Vector2(0, 70),
           size: Vector2(40, 40),
-        );
+        ) {
+    // Alta prioridad para recibir eventos táctiles primero
+    priority = 100;
+  }
   
   @override
   void onMount() {
-    // Posicionar en la esquina superior derecha, debajo del botón de pausa
-    position = Vector2(
-      gameRef.size.x - width - 20,
-      70, // Debajo del botón de pausa
-    );
+    _updatePosition();
     super.onMount();
   }
 
   @override
+  bool hasGesture() => true;
+
+  // Actualizar posición para mantenerla correcta después de cambios de cámara o zoom
+  void _updatePosition() {
+    position = Vector2(
+      gameRef.size.x - width - 20,
+      70, // Debajo del botón de pausa
+    );
+  }
+
+  @override
+  void update(double dt) {
+    // Verificar y actualizar posición si es necesario (por cambios de zoom/cámara)
+    if (position.x != gameRef.size.x - width - 20) {
+      _updatePosition();
+    }
+    super.update(dt);
+  }
+
+  @override
   void render(Canvas canvas) {
-    // Dibujar fondo del botón
-    final paint = Paint()
-      ..color = Colors.black.withOpacity(0.5)
+    // Dibujar fondo del botón con borde más visible
+    final bgPaint = Paint()
+      ..color = Colors.black.withOpacity(0.7)
       ..style = PaintingStyle.fill;
     
     canvas.drawRRect(
@@ -34,7 +53,21 @@ class InventoryButtonComponent extends InterfaceComponent {
         Rect.fromLTWH(0, 0, width, height),
         Radius.circular(8),
       ),
-      paint,
+      bgPaint,
+    );
+    
+    // Dibujar borde para hacerlo más visible
+    final borderPaint = Paint()
+      ..color = Colors.amber.withOpacity(0.8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, width, height),
+        Radius.circular(8),
+      ),
+      borderPaint,
     );
     
     // Dibujar icono de mochila/inventario
@@ -66,9 +99,24 @@ class InventoryButtonComponent extends InterfaceComponent {
   }
 
   @override
+  bool containsPoint(Vector2 point) {
+    // Área de toque más grande para facilitar la interacción
+    final expandedRect = Rect.fromLTWH(
+      position.x - 10,
+      position.y - 10,
+      width + 20,
+      height + 20,
+    );
+    return expandedRect.contains(point.toOffset());
+  }
+
+  @override
   bool onTapDown(GestureEvent event) {
-    _showInventoryPanel();
-    return true;
+    if (containsPoint(event.screenPosition)) {
+      _showInventoryPanel();
+      return true;
+    }
+    return false;
   }
 
   void _showInventoryPanel() {

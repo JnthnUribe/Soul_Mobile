@@ -39,11 +39,12 @@ class Knight extends SimplePlayer with Lighting, BlockMovementCollision {
           speed: tileSize * 2.5,
         ) {
     baseSpeed = tileSize * 2.5;
+    // Optimizado: Reducir iluminación del jugador para mejor rendimiento
     setupLighting(
       LightingConfig(
-        radius: width * 1.5,
-        blurBorder: width,
-        color: Colors.deepOrangeAccent.withOpacity(0.2),
+        radius: width * 1.2,
+        blurBorder: width * 0.6,
+        color: Colors.deepOrangeAccent.withOpacity(0.15),
       ),
     );
     setupMovementByJoystick(intensityEnabled: true);
@@ -230,41 +231,29 @@ class Knight extends SimplePlayer with Lighting, BlockMovementCollision {
     );
   }
   
-  // Mostrar efecto visual del escudo
+  // Mostrar efecto visual del escudo (Optimizado)
   void _showShieldEffect() {
     if (!isMounted || !hasGameRef) return;
     
     _removeShieldEffect(); // Remover efecto anterior si existe
     
-    // Crear un círculo brillante alrededor del jugador con más grosor
+    // Crear un círculo brillante alrededor del jugador (simplificado para mejor rendimiento)
     _shieldEffect = CircleComponent(
       radius: tileSize * 0.75,
       position: center,
       anchor: Anchor.center,
       paint: Paint()
-        ..color = Colors.cyan.withOpacity(0.5)
+        ..color = Colors.cyan.withOpacity(0.4)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 4,
+        ..strokeWidth = 3,
     );
     
     if (_shieldEffect != null) {
       gameRef.add(_shieldEffect!);
       
-      // Agregar efecto de parpadeo más lento y suave
+      // Solo un efecto simple de parpadeo (más eficiente)
       _shieldEffect!.add(
         OpacityEffect.fadeOut(
-          EffectController(
-            duration: 0.8,
-            infinite: true,
-            reverseDuration: 0.8,
-          ),
-        ),
-      );
-      
-      // Agregar efecto de escala pulsante
-      _shieldEffect!.add(
-        ScaleEffect.by(
-          Vector2.all(1.1),
           EffectController(
             duration: 1.0,
             infinite: true,
@@ -272,6 +261,7 @@ class Knight extends SimplePlayer with Lighting, BlockMovementCollision {
           ),
         ),
       );
+      // Removido ScaleEffect para mejor rendimiento
     }
   }
   
@@ -404,11 +394,7 @@ class Knight extends SimplePlayer with Lighting, BlockMovementCollision {
         size: Vector2(tileSize / 3, tileSize / 3),
         position: Vector2(10, 5),
       ),
-      lightingConfig: LightingConfig(
-        radius: tileSize * 0.9,
-        blurBorder: tileSize / 2,
-        color: Colors.deepOrangeAccent.withOpacity(0.4),
-      ),
+      // Removido lightingConfig para mejor rendimiento en móviles
     );
   }
 
@@ -417,29 +403,33 @@ class Knight extends SimplePlayer with Lighting, BlockMovementCollision {
     if (isDead) return;
     _verifyStamina();
     
-    // Actualizar posición del escudo si está activo
+    // Optimizado: Actualizar posición del escudo solo si está activo
     if (isInvincible && _shieldEffect != null && _shieldEffect!.isMounted) {
       _shieldEffect!.position = center;
       
-      // Actualizar tiempo restante de invencibilidad
-      if (_invincibilityStartTime != null) {
+      // Optimizado: Calcular tiempo restante solo cada 0.5 segundos
+      if (_invincibilityStartTime != null && checkInterval('updateInvTime', 500, dt)) {
         final elapsed = DateTime.now().difference(_invincibilityStartTime!).inSeconds;
         invincibilityTimeLeft = (_invincibilityDuration - elapsed).toDouble();
         if (invincibilityTimeLeft < 0) invincibilityTimeLeft = 0;
       }
     }
     
-    seeEnemy(
-      radiusVision: tileSize * 6,
-      notObserved: () {
-        showObserveEnemy = false;
-      },
-      observed: (enemies) {
-        if (showObserveEnemy) return;
-        showObserveEnemy = true;
-        _showEmote();
-      },
-    );
+    // Optimizado: Verificar enemigos con menos frecuencia y menor radio
+    if (checkInterval('checkEnemies', 200, dt)) {
+      seeEnemy(
+        radiusVision: tileSize * 5,
+        notObserved: () {
+          showObserveEnemy = false;
+        },
+        observed: (enemies) {
+          if (showObserveEnemy) return;
+          showObserveEnemy = true;
+          _showEmote();
+        },
+      );
+    }
+    
     super.update(dt);
   }
 

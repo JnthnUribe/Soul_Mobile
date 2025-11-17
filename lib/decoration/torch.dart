@@ -11,12 +11,13 @@ class Torch extends GameDecoration {
           position: position,
           size: Vector2.all(tileSize),
         ) {
+    // Optimizado: Reducir radio y desactivar pulso para mejor rendimiento
     setupLighting(
       LightingConfig(
-        radius: width * 2.5,
-        blurBorder: width,
-        pulseVariation: 0.1,
-        color: Colors.deepOrangeAccent.withOpacity(0.2),
+        radius: width * 1.8,
+        blurBorder: width * 0.7,
+        pulseVariation: 0.0, // Desactivar pulso ahorra recursos
+        color: Colors.deepOrangeAccent.withOpacity(0.15),
       ),
     );
   }

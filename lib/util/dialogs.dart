@@ -211,11 +211,16 @@ class Dialogs {
                         padding: EdgeInsets.symmetric(vertical: 12),
                       ),
                       onPressed: () {
+                        // Cerrar el menú de pausa
                         Navigator.of(context).pop();
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (context) => Game()),
-                          (Route<dynamic> route) => false,
-                        );
+                        
+                        // Esperar un momento para que se limpie todo
+                        Future.delayed(Duration(milliseconds: 200), () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (context) => Game()),
+                            (Route<dynamic> route) => false,
+                          );
+                        });
                         onRestart();
                       },
                       child: Row(

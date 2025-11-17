@@ -56,4 +56,13 @@ class Sounds {
   static void dispose() {
     FlameAudio.bgm.dispose();
   }
+
+  static void cleanupAll() {
+    try {
+      FlameAudio.bgm.stop();
+      FlameAudio.audioCache.clearAll();
+    } catch (e) {
+      print('Error al limpiar sonidos: $e');
+    }
+  }
 }

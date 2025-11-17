@@ -23,10 +23,16 @@ class GameController extends GameComponent {
     Dialogs.showGameOver(
       context,
       () {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => Game()),
-          (Route<dynamic> route) => false,
-        );
+        // Cerrar el diálogo primero
+        Navigator.of(context).pop();
+        
+        // Esperar un momento para que se limpie todo
+        Future.delayed(Duration(milliseconds: 200), () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => Game()),
+            (Route<dynamic> route) => false,
+          );
+        });
       },
     );
   }

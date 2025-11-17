@@ -7,7 +7,7 @@ class MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {
   const MyLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => ['en', 'pt', 'es'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => locale.languageCode == 'es'; // Solo español
 
   @override
   Future<MyLocalizations> load(Locale locale) async {
@@ -21,18 +21,12 @@ class MyLocalizationsDelegate extends LocalizationsDelegate<MyLocalizations> {
   bool shouldReload(MyLocalizationsDelegate old) => false;
 
   Locale resolution(Locale? locale, Iterable<Locale> supportedLocales) {
-    for (Locale supportedLocale in supportedLocales) {
-      if (locale != null) {
-        if (supportedLocale.languageCode == locale.languageCode ||
-            supportedLocale.countryCode == locale.countryCode) {
-          return supportedLocale;
-        }
-      }
-    }
-    return supportedLocales.first;
+    // Siempre devolver español, sin importar el idioma del dispositivo
+    return const Locale('es', 'ES');
   }
 
   static List<Locale> supportedLocales() {
-    return [const Locale('en', 'US'), const Locale('pt', 'BR'), const Locale('es', 'ES')];
+    // Solo español disponible
+    return [const Locale('es', 'ES')];
   }
 }

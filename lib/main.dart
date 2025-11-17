@@ -24,14 +24,20 @@ void main() async {
         fontFamily: 'Normal',
       ),
       home: Menu(),
-      supportedLocales: MyLocalizationsDelegate.supportedLocales(),
+      // Forzar español en toda la aplicación (Android & iOS)
+      locale: const Locale('es', 'ES'),
+      supportedLocales: [const Locale('es', 'ES')], // Solo español
       localizationsDelegates: [
         myLocation,
         DefaultCupertinoLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
-      localeResolutionCallback: myLocation.resolution,
+      localeResolutionCallback: (locale, supportedLocales) {
+        // Siempre devolver español, sin importar el idioma del dispositivo
+        print('🌍 Forzando idioma a español');
+        return const Locale('es', 'ES');
+      },
     ),
   );
 }

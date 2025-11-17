@@ -19,9 +19,12 @@ import 'package:darkness_dungeon/util/player_inventory.dart';
 import 'package:darkness_dungeon/widgets/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 class Game extends StatefulWidget {
   static bool useJoystick = true;
+  static bool isRestarting = false; // Flag para evitar detener música al reiniciar
+  
   const Game({Key? key}) : super(key: key);
 
   @override
@@ -33,42 +36,87 @@ class GameState extends State<Game> {
   
   @override
   void initState() {
-    Sounds.playBackgroundSound();
     super.initState();
+    print('🎮 Iniciando nuevo juego... (isRestarting: ${Game.isRestarting})');
+    
+    // Siempre iniciar la música, sin importar si es reinicio o no
+    _startBackgroundMusic();
+  }
+  
+  Future<void> _startBackgroundMusic() async {
+    // Esperar más tiempo si es un reinicio para que dispose() termine primero
+    final delayTime = Game.isRestarting ? 600 : 300;
+    await Future.delayed(Duration(milliseconds: delayTime));
+    
+    if (mounted) {
+      await Sounds.playBackgroundSound();
+    }
   }
 
   @override
   void dispose() {
     // Limpieza completa para evitar juegos sobrepuestos
-    Sounds.cleanupAll(); // Limpiar todos los sonidos y caché
+    print('🧹 Limpiando juego... (isRestarting: ${Game.isRestarting})');
+    
+    // IMPORTANTE: Si estamos reiniciando, NO detener la música
+    // porque el nuevo juego usará el mismo reproductor
+    if (!Game.isRestarting) {
+      try {
+        FlameAudio.bgm.stop();
+        print('🔇 Música detenida (no es reinicio)');
+      } catch (e) {
+        print('⚠️ Error al detener música: $e');
+      }
+    } else {
+      print('♻️ Reiniciando - NO deteniendo música para el nuevo juego');
+      // AHORA SÍ resetear el flag DESPUÉS de verificarlo
+      Game.isRestarting = false;
+    }
     
     // Detener y limpiar el juego si existe
     if (gameRef != null) {
       try {
-        // Pausar el game loop
+        // Pausar el game loop primero
         gameRef!.pauseEngine();
         
-        // Limpiar overlays si es posible
+        // Limpiar overlays
         try {
           gameRef!.overlays.clear();
         } catch (e) {
-          // Ignorar si no se puede limpiar overlays
+          print('⚠️ Error al limpiar overlays: $e');
         }
         
-        // Remover todos los componentes del juego
+        // Remover TODOS los componentes recursivamente
         if (gameRef is BonfireGame) {
           final bonfireGame = gameRef as BonfireGame;
-          final components = List.from(bonfireGame.children);
-          for (var component in components) {
-            component.removeFromParent();
+          
+          // Limpiar múltiples veces para asegurar que se eliminen todos
+          for (int i = 0; i < 3; i++) {
+            try {
+              final components = List.from(bonfireGame.children);
+              print('🗑️ Removiendo ${components.length} componentes (iteración ${i + 1})');
+              for (var component in components) {
+                try {
+                  component.removeFromParent();
+                } catch (e) {
+                  // Ignorar errores individuales
+                }
+              }
+            } catch (e) {
+              print('⚠️ Error en iteración $i: $e');
+            }
           }
         }
         
+        // Limpiar la referencia
+        gameRef = null;
+        
       } catch (e) {
-        print('Error al limpiar el juego: $e');
+        print('❌ Error al limpiar el juego: $e');
       }
     }
     
+    print('✅ Juego limpiado completamente');
     super.dispose();
   }
 

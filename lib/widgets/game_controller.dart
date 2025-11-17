@@ -23,11 +23,17 @@ class GameController extends GameComponent {
     Dialogs.showGameOver(
       context,
       () {
+        print('🔄 Reiniciando desde Game Over...');
+        
+        // Marcar que estamos reiniciando ANTES de cerrar
+        Game.isRestarting = true;
+        
         // Cerrar el diálogo primero
         Navigator.of(context).pop();
         
-        // Esperar un momento para que se limpie todo
-        Future.delayed(Duration(milliseconds: 200), () {
+        // Esperar más tiempo para que dispose() se complete ANTES de crear el nuevo juego
+        Future.delayed(Duration(milliseconds: 500), () {
+          print('⏭️ Navegando a nuevo juego...');
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => Game()),
             (Route<dynamic> route) => false,

@@ -211,17 +211,25 @@ class Dialogs {
                         padding: EdgeInsets.symmetric(vertical: 12),
                       ),
                       onPressed: () {
-                        // Cerrar el menú de pausa
-                        Navigator.of(context).pop();
+                        print('🔄 Reiniciando desde menú de pausa...');
                         
-                        // Esperar un momento para que se limpie todo
-                        Future.delayed(Duration(milliseconds: 200), () {
-                          Navigator.of(context).pushAndRemoveUntil(
+                        // Marcar que estamos reiniciando ANTES de cerrar
+                        Game.isRestarting = true;
+                        
+                        // Guardar el navigator ANTES de cerrar
+                        final navigator = Navigator.of(context);
+                        
+                        // Cerrar el menú de pausa
+                        navigator.pop();
+                        
+                        // Esperar para que todo se limpie
+                        Future.delayed(Duration(milliseconds: 500), () {
+                          print('⏭️ Navegando a nuevo juego...');
+                          navigator.pushAndRemoveUntil(
                             MaterialPageRoute(builder: (context) => Game()),
                             (Route<dynamic> route) => false,
                           );
                         });
-                        onRestart();
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

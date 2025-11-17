@@ -36,9 +36,28 @@ class Sounds {
     return FlameAudio.bgm.stop();
   }
 
-  static void playBackgroundSound() async {
-    await FlameAudio.bgm.stop();
-    FlameAudio.bgm.play('sound_bg.mp3');
+  static Future<void> playBackgroundSound() async {
+    try {
+      print('🎵 Intentando reproducir música...');
+      
+      // Detener primero si hay algo reproduciéndose
+      try {
+        await FlameAudio.bgm.stop();
+        print('⏹️ Música anterior detenida');
+      } catch (e) {
+        print('⚠️ No había música para detener: $e');
+      }
+      
+      // Pequeña pausa antes de reproducir
+      await Future.delayed(Duration(milliseconds: 100));
+      
+      // Reproducir música de fondo
+      await FlameAudio.bgm.play('sound_bg.mp3', volume: 1.0);
+      print('✅ Música de fondo iniciada correctamente');
+      
+    } catch (e) {
+      print('❌ Error al reproducir música: $e');
+    }
   }
 
   static void playBackgroundBoosSound() {
@@ -57,12 +76,15 @@ class Sounds {
     FlameAudio.bgm.dispose();
   }
 
-  static void cleanupAll() {
+  static Future<void> cleanupAll() async {
     try {
-      FlameAudio.bgm.stop();
-      FlameAudio.audioCache.clearAll();
+      // Solo detener la música, NO hacer dispose
+      // (dispose() destruye el player y no se puede volver a usar)
+      print('🔇 Deteniendo música...');
+      await FlameAudio.bgm.stop();
+      print('✅ Música detenida correctamente');
     } catch (e) {
-      print('Error al limpiar sonidos: $e');
+      print('⚠️ Error al detener sonidos: $e');
     }
   }
 }

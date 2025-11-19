@@ -12,6 +12,8 @@ import 'package:darkness_dungeon/util/localization/strings_location.dart';
 import 'package:darkness_dungeon/util/npc_sprite_sheet.dart';
 import 'package:darkness_dungeon/util/player_sprite_sheet.dart';
 import 'package:darkness_dungeon/util/sounds.dart';
+import 'package:darkness_dungeon/level2.dart';
+import 'package:darkness_dungeon/util/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -101,6 +103,9 @@ class Boss extends SimpleEnemy with BlockMovementCollision, UseLifeBar {
       if (!e.isDead) e.onDie();
     });
     removeFromParent();
+    
+    // La lógica de victoria es manejada por el NPC Kid
+    
     super.onDie();
   }
 
@@ -254,7 +259,7 @@ class Boss extends SimpleEnemy with BlockMovementCollision, UseLifeBar {
         addInitChild();
         Future.delayed(Duration(milliseconds: 500), () {
           gameRef.camera.moveToPlayerAnimated(zoom: 1);
-          Sounds.playBackgroundBoosSound();
+          // Música de jefe deshabilitada por rendimiento
         });
       },
       onChangeTalk: (index) {

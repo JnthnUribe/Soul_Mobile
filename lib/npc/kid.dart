@@ -1,5 +1,6 @@
 import 'package:bonfire/bonfire.dart';
 import 'package:darkness_dungeon/enemies/boss.dart';
+import 'package:darkness_dungeon/level2.dart';
 import 'package:darkness_dungeon/util/custom_sprite_animation_widget.dart';
 import 'package:darkness_dungeon/util/dialogs.dart';
 import 'package:darkness_dungeon/util/functions.dart';
@@ -62,7 +63,15 @@ class Kid extends GameDecoration {
       onFinish: () {
         Sounds.interaction();
         gameRef.camera.moveToPlayerAnimated(onComplete: () {
-          Dialogs.showCongratulations(gameRef.context);
+          Dialogs.showVictoryDialog(
+            gameRef.context,
+            () {
+              Navigator.of(gameRef.context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => Level2()),
+                (Route<dynamic> route) => false,
+              );
+            },
+          );
         });
       },
       onChangeTalk: (index) {

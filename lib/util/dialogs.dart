@@ -361,4 +361,98 @@ class Dialogs {
       },
     );
   }
+
+  static void showVictoryDialog(
+      BuildContext context, VoidCallback onNextLevel) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // Título de Victoria
+              Text(
+                "¡VICTORIA!",
+                style: TextStyle(
+                  color: Colors.amber,
+                  fontFamily: 'Normal',
+                  fontSize: 40.0,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 10.0,
+                      color: Colors.black,
+                      offset: Offset(5.0, 5.0),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 30.0),
+
+              // Botón Siguiente Nivel
+              SizedBox(
+                width: 200,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    onNextLevel();
+                  },
+                  child: Text(
+                    'Siguiente Nivel',
+                    style: TextStyle(
+                      fontFamily: 'Normal',
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 15.0),
+
+              // Botón Menú Principal
+              SizedBox(
+                width: 200,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[800],
+                    foregroundColor: Colors.white,
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => Menu()),
+                      (Route<dynamic> route) => false,
+                    );
+                  },
+                  child: Text(
+                    'Menú Principal',
+                    style: TextStyle(
+                      fontFamily: 'Normal',
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

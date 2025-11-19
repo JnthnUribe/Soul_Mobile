@@ -1,67 +1,134 @@
 import 'package:flame_audio/flame_audio.dart';
 
 class Sounds {
+  // Control de tiempo para evitar spam de sonidos (debounce)
+  static DateTime _lastAttackPlayer = DateTime.now();
+  static DateTime _lastAttackRange = DateTime.now();
+  static DateTime _lastAttackEnemy = DateTime.now();
+  static DateTime _lastInteraction = DateTime.now();
+  
+  // Intervalo mínimo entre sonidos idénticos (en milisegundos)
+  static const int _minInterval = 80; // Reducido ligeramente para mejor respuesta
+
+  // Audio Pools para baja latencia
+  static late AudioPool poolAttackPlayer;
+  static late AudioPool poolAttackRange;
+  static late AudioPool poolAttackEnemy;
+  static late AudioPool poolExplosion;
+  static late AudioPool poolInteraction;
+
   static Future initialize() async {
     FlameAudio.bgm.initialize();
-    await FlameAudio.audioCache.loadAll([
-      'attack_player.mp3',
-      'attack_fire_ball.wav',
-      'attack_enemy.mp3',
-      'explosion.wav',
-      'sound_interaction.wav',
-    ]);
-  }
-
-  static void attackPlayerMelee() {
-    FlameAudio.play('attack_player.mp3', volume: 0.4);
-  }
-
-  static void attackRange() {
-    FlameAudio.play('attack_fire_ball.wav', volume: 0.3);
-  }
-
-  static void attackEnemyMelee() {
-    FlameAudio.play('attack_enemy.mp3', volume: 0.4);
-  }
-
-  static void explosion() {
-    FlameAudio.play('explosion.wav');
-  }
-
-  static void interaction() {
-    FlameAudio.play('sound_interaction.wav', volume: 0.4);
-  }
-
-  static stopBackgroundSound() {
-    return FlameAudio.bgm.stop();
-  }
-
-  static Future<void> playBackgroundSound() async {
+    
+    // Inicializar Pools (pre-carga sonidos en memoria para reproducción instantánea)
+    // maxPlayers: 1 significa que si se llama de nuevo mientras suena, se corta o ignora según config.
+    // Para efectos rápidos, queremos permitir solapamiento controlado.
+    
     try {
-      print('🎵 Intentando reproducir música...');
+      poolAttackPlayer = await FlameAudio.createPool(
+        'attack_player.wav',
+        minPlayers: 2,
+        maxPlayers: 4,
+      );
       
-      // Detener primero si hay algo reproduciéndose
-      try {
-        await FlameAudio.bgm.stop();
-        print('⏹️ Música anterior detenida');
-      } catch (e) {
-        print('⚠️ No había música para detener: $e');
-      }
+      poolAttackRange = await FlameAudio.createPool(
+        'attack_fire_ball.wav',
+        minPlayers: 2,
+        maxPlayers: 4,
+      );
       
-      // Pequeña pausa antes de reproducir
-      await Future.delayed(Duration(milliseconds: 100));
+      poolAttackEnemy = await FlameAudio.createPool(
+        'attack_enemy.wav',
+        minPlayers: 2,
+        maxPlayers: 4,
+      );
       
-      // Reproducir música de fondo
-      await FlameAudio.bgm.play('sound_bg.mp3', volume: 1.0);
-      print('✅ Música de fondo iniciada correctamente');
+      poolExplosion = await FlameAudio.createPool(
+        'explosion.wav',
+        minPlayers: 2,
+        maxPlayers: 5,
+      );
       
+      poolInteraction = await FlameAudio.createPool(
+        'sound_interaction.wav',
+        minPlayers: 1,
+        maxPlayers: 2,
+      );
+      
+      print('✅ AudioPools inicializados correctamente');
     } catch (e) {
-      print('❌ Error al reproducir música: $e');
+      print('❌ Error al inicializar AudioPools: $e');
     }
   }
 
+  static bool _canPlay(DateTime lastTime) {
+    return DateTime.now().difference(lastTime).inMilliseconds > _minInterval;
+  }
+
+  static void attackPlayerMelee() {
+    if (_canPlay(_lastAttackPlayer)) {
+      _lastAttackPlayer = DateTime.now();
+      try {
+        poolAttackPlayer.start(volume: 0.4);
+      } catch (e) {
+        print('Error playing sound: $e');
+      }
+    }
+  }
+
+  static void attackRange() {
+    if (_canPlay(_lastAttackRange)) {
+      _lastAttackRange = DateTime.now();
+      try {
+        poolAttackRange.start(volume: 0.3);
+      } catch (e) {
+        print('Error playing sound: $e');
+      }
+    }
+  }
+
+  static void attackEnemyMelee() {
+    if (_canPlay(_lastAttackEnemy)) {
+      _lastAttackEnemy = DateTime.now();
+      try {
+        poolAttackEnemy.start(volume: 0.4);
+      } catch (e) {
+        print('Error playing sound: $e');
+      }
+    }
+  }
+
+  static void explosion() {
+    try {
+      poolExplosion.start();
+    } catch (e) {
+      print('Error playing sound: $e');
+    }
+  }
+
+  static void interaction() {
+    if (_canPlay(_lastInteraction)) {
+      _lastInteraction = DateTime.now();
+      try {
+        poolInteraction.start(volume: 0.4);
+      } catch (e) {
+        print('Error playing sound: $e');
+      }
+    }
+  }
+
+  static void stopBackgroundSound() {
+    FlameAudio.bgm.stop();
+  }
+
+  static Future<void> playBackgroundSound() async {
+    // Deshabilitado por rendimiento
+    return;
+  }
+
   static void playBackgroundBoosSound() {
-    FlameAudio.bgm.play('battle_boss.mp3');
+    // Deshabilitado por rendimiento
+    return;
   }
 
   static void pauseBackgroundSound() {
@@ -78,11 +145,10 @@ class Sounds {
 
   static Future<void> cleanupAll() async {
     try {
-      // Solo detener la música, NO hacer dispose
-      // (dispose() destruye el player y no se puede volver a usar)
-      print('🔇 Deteniendo música...');
+      print('🔇 Deteniendo todos los sonidos...');
       await FlameAudio.bgm.stop();
-      print('✅ Música detenida correctamente');
+      // No necesitamos limpiar caché si usamos Pools, pero podemos detener bgm
+      print('✅ Sonidos detenidos');
     } catch (e) {
       print('⚠️ Error al detener sonidos: $e');
     }

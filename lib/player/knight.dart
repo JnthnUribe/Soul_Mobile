@@ -436,7 +436,7 @@ class Knight extends SimplePlayer with Lighting, BlockMovementCollision {
   void _verifyStamina() {
     if (_timerStamina == null) {
       _timerStamina = async.Timer(
-        Duration(milliseconds: 150),
+        Duration(milliseconds: 50),
         () {
           _timerStamina = null;
         },

@@ -23,8 +23,9 @@ import 'package:flame_audio/flame_audio.dart';
 
 class Game extends StatefulWidget {
   static bool useJoystick = true;
-  static bool isRestarting = false; // Flag para evitar detener música al reiniciar
-  
+  static bool isRestarting =
+      false; // Flag para evitar detener música al reiniciar
+
   const Game({Key? key}) : super(key: key);
 
   @override
@@ -32,36 +33,37 @@ class Game extends StatefulWidget {
 }
 
 class GameState extends State<Game> {
-  BonfireGameInterface? gameRef; // Referencia al juego para limpiarlo correctamente
-  
+  BonfireGameInterface?
+      gameRef; // Referencia al juego para limpiarlo correctamente
+
   @override
   void initState() {
     super.initState();
     print('🎮 Iniciando nuevo juego... (isRestarting: ${Game.isRestarting})');
     // Música deshabilitada por rendimiento
   }
-  
+
   @override
   void dispose() {
     print('🧹 Limpiando juego... (isRestarting: ${Game.isRestarting})');
-    
+
     // Limpiar sonidos
     Sounds.stopBackgroundSound();
-    
+
     if (Game.isRestarting) {
       print('♻️ Reiniciando - Flag activo');
       Game.isRestarting = false;
     }
-    
+
     // Detener y limpiar el juego si existe
     if (gameRef != null) {
       try {
         gameRef!.pauseEngine();
         gameRef!.overlays.clear();
-        
+
         if (gameRef is BonfireGame) {
           final bonfireGame = gameRef as BonfireGame;
-          
+
           // Limpiar componentes
           for (var component in bonfireGame.children) {
             try {
@@ -74,7 +76,7 @@ class GameState extends State<Game> {
         print('❌ Error al limpiar el juego: $e');
       }
     }
-    
+
     print('✅ Juego limpiado completamente');
     super.dispose();
   }
@@ -105,17 +107,17 @@ class GameState extends State<Game> {
         ),
         JoystickAction(
           actionId: 2,
-          sprite: Sprite.load('joystick_atack.png'), // Escudo
+          sprite: Sprite.load('joystick_shield.png'), // Escudo
           spritePressed: Sprite.load('joystick_atack_selected.png'),
           size: 50,
-          margin: EdgeInsets.only(bottom: 120, right: 160),
+          margin: EdgeInsets.only(bottom: 130, right: 140),
         ),
         JoystickAction(
           actionId: 3,
-          sprite: Sprite.load('joystick_atack_range.png'), // Poción
+          sprite: Sprite.load('joystick_health.png'), // Poción
           spritePressed: Sprite.load('joystick_atack_range_selected.png'),
           size: 50,
-          margin: EdgeInsets.only(bottom: 120, right: 50),
+          margin: EdgeInsets.only(bottom: 160, right: 60),
         )
       ],
     );
@@ -149,46 +151,46 @@ class GameState extends State<Game> {
             player: Knight(
               Vector2(2 * tileSize, 3 * tileSize),
             ),
-        map: WorldMapByTiled(
-          WorldMapReader.fromAsset('tiled/map.json'),
-          forceTileSize: Vector2(tileSize, tileSize),
-          objectsBuilder: {
-            'door': (p) => Door(p.position, p.size),
-            'torch': (p) => Torch(p.position),
-            'potion': (p) => PotionLife(p.position, 30),
-            'wizard': (p) => WizardNPC(p.position),
-            'spikes': (p) => Spikes(p.position),
-            'key': (p) => DoorKey(p.position),
-            'kid': (p) => Kid(p.position),
-            'boss': (p) => Boss(p.position),
-            'goblin': (p) => Goblin(p.position),
-            'imp': (p) => Imp(p.position),
-            'mini_boss': (p) => MiniBoss(p.position),
-            'torch_empty': (p) => Torch(p.position, empty: true),
-          },
-        ),
-        components: [GameController()],
-        interface: KnightInterface(),
-        // Reducir opacidad de iluminación para mejor rendimiento
-        lightingColorGame: Colors.black.withOpacity(0.4),
-        backgroundColor: Colors.grey[900]!,
-        cameraConfig: CameraConfig(
-          speed: 3,
-          zoom: getZoomFromMaxVisibleTile(context, tileSize, 18),
-        ),
-        // progress: Container(
-        //   color: Colors.black,
-        //   child: Center(
-        //     child: Text(
-        //       "Loading...",
-        //       style: TextStyle(
-        //         color: Colors.white,
-        //         fontFamily: 'Normal',
-        //         fontSize: 20.0,
-        //       ),
-        //     ),
-        //   ),
-        // ),
+            map: WorldMapByTiled(
+              WorldMapReader.fromAsset('tiled/map.json'),
+              forceTileSize: Vector2(tileSize, tileSize),
+              objectsBuilder: {
+                'door': (p) => Door(p.position, p.size),
+                'torch': (p) => Torch(p.position),
+                'potion': (p) => PotionLife(p.position, 30),
+                'wizard': (p) => WizardNPC(p.position),
+                'spikes': (p) => Spikes(p.position),
+                'key': (p) => DoorKey(p.position),
+                'kid': (p) => Kid(p.position),
+                'boss': (p) => Boss(p.position),
+                'goblin': (p) => Goblin(p.position),
+                'imp': (p) => Imp(p.position),
+                'mini_boss': (p) => MiniBoss(p.position),
+                'torch_empty': (p) => Torch(p.position, empty: true),
+              },
+            ),
+            components: [GameController()],
+            interface: KnightInterface(),
+            // Reducir opacidad de iluminación para mejor rendimiento
+            lightingColorGame: Colors.black.withOpacity(0.4),
+            backgroundColor: Colors.grey[900]!,
+            cameraConfig: CameraConfig(
+              speed: 3,
+              zoom: getZoomFromMaxVisibleTile(context, tileSize, 18),
+            ),
+            // progress: Container(
+            //   color: Colors.black,
+            //   child: Center(
+            //     child: Text(
+            //       "Loading...",
+            //       style: TextStyle(
+            //         color: Colors.white,
+            //         fontFamily: 'Normal',
+            //         fontSize: 20.0,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ),
           // Botones de UI siempre encima de todo (no se bloquean con diálogos)
           _buildUIButtons(context),
@@ -311,7 +313,7 @@ class _InventoryButtonState extends State<_InventoryButton> {
   void _showInventoryPanel(BuildContext context) async {
     // Recargar inventario para asegurar datos actualizados
     await inventory.loadInventory();
-    
+
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -354,89 +356,106 @@ class _InventoryButtonState extends State<_InventoryButton> {
                       ),
                     ],
                   ),
-                  
-                  Divider(color: Colors.amber.withOpacity(0.3), thickness: 2, height: 10),
-                  
+
+                  Divider(
+                      color: Colors.amber.withOpacity(0.3),
+                      thickness: 2,
+                      height: 10),
+
                   // Contenido con scroll
                   Flexible(
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
                           SizedBox(height: 8),
-                          
+
                           // Sección de Consumibles
                           _buildSectionTitle('CONSUMIBLES'),
-                          
+
                           _buildInventoryItem(
                             '🛡️',
                             'Escudo Mágico',
-                            inventory.getConsumableQuantity('invincibility_30s'),
+                            inventory
+                                .getConsumableQuantity('invincibility_30s'),
                             Colors.cyan,
                           ),
-                          
+
                           _buildInventoryItem(
                             '🧪',
                             'Poción Pequeña',
                             inventory.getConsumableQuantity('potion_small'),
                             Colors.red,
                           ),
-                          
+
                           _buildInventoryItem(
                             '🧪',
                             'Poción Mediana',
                             inventory.getConsumableQuantity('potion_medium'),
                             Colors.orange,
                           ),
-                          
+
                           _buildInventoryItem(
                             '🧪',
                             'Poción Grande',
                             inventory.getConsumableQuantity('potion_large'),
                             Colors.purple,
                           ),
-                          
+
                           _buildInventoryItem(
                             '🔑',
                             'Llaves',
-                            inventory.getConsumableQuantity('key_single') + 
-                            inventory.getConsumableQuantity('key_pack_3') * 3,
+                            inventory.getConsumableQuantity('key_single') +
+                                inventory.getConsumableQuantity('key_pack_3') *
+                                    3,
                             Colors.yellow,
                           ),
-                          
+
                           SizedBox(height: 15),
-                          
+
                           // Sección de Mejoras Permanentes
                           _buildSectionTitle('MEJORAS PERMANENTES'),
-                          
-                          _buildUpgradeStatus('⚔️ Espada Mejorada', 
-                            inventory.hasPermanentUpgrade('weapon_upgrade_1')),
-                          
-                          _buildUpgradeStatus('⚔️ Espada Legendaria', 
-                            inventory.hasPermanentUpgrade('weapon_upgrade_2')),
-                          
-                          _buildUpgradeStatus('👟 Botas de Velocidad', 
-                            inventory.hasPermanentUpgrade('speed_upgrade_1')),
-                          
-                          _buildUpgradeStatus('💎 Amuleto de Stamina', 
-                            inventory.hasPermanentUpgrade('stamina_upgrade_1')),
-                          
-                          _buildUpgradeStatus('💎 Amuleto Supremo', 
-                            inventory.hasPermanentUpgrade('stamina_upgrade_2')),
-                          
-                          _buildUpgradeStatus('❤️ Corazón de Vida', 
-                            inventory.hasPermanentUpgrade('health_upgrade_1')),
-                          
-                          _buildUpgradeStatus('❤️ Corazón Legendario', 
-                            inventory.hasPermanentUpgrade('health_upgrade_2')),
-                          
+
+                          _buildUpgradeStatus(
+                              '⚔️ Espada Mejorada',
+                              inventory
+                                  .hasPermanentUpgrade('weapon_upgrade_1')),
+
+                          _buildUpgradeStatus(
+                              '⚔️ Espada Legendaria',
+                              inventory
+                                  .hasPermanentUpgrade('weapon_upgrade_2')),
+
+                          _buildUpgradeStatus('👟 Botas de Velocidad',
+                              inventory.hasPermanentUpgrade('speed_upgrade_1')),
+
+                          _buildUpgradeStatus(
+                              '💎 Amuleto de Stamina',
+                              inventory
+                                  .hasPermanentUpgrade('stamina_upgrade_1')),
+
+                          _buildUpgradeStatus(
+                              '💎 Amuleto Supremo',
+                              inventory
+                                  .hasPermanentUpgrade('stamina_upgrade_2')),
+
+                          _buildUpgradeStatus(
+                              '❤️ Corazón de Vida',
+                              inventory
+                                  .hasPermanentUpgrade('health_upgrade_1')),
+
+                          _buildUpgradeStatus(
+                              '❤️ Corazón Legendario',
+                              inventory
+                                  .hasPermanentUpgrade('health_upgrade_2')),
+
                           SizedBox(height: 8),
                         ],
                       ),
                     ),
                   ),
-                  
+
                   SizedBox(height: 8),
-                  
+
                   // Botón cerrar
                   SizedBox(
                     width: double.infinity,
@@ -468,7 +487,7 @@ class _InventoryButtonState extends State<_InventoryButton> {
       },
     );
   }
-  
+
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 6),
@@ -484,8 +503,9 @@ class _InventoryButtonState extends State<_InventoryButton> {
       ),
     );
   }
-  
-  Widget _buildInventoryItem(String emoji, String name, int quantity, Color color) {
+
+  Widget _buildInventoryItem(
+      String emoji, String name, int quantity, Color color) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 2),
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -493,7 +513,9 @@ class _InventoryButtonState extends State<_InventoryButton> {
         color: Colors.black.withOpacity(0.3),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: quantity > 0 ? color.withOpacity(0.5) : Colors.grey.withOpacity(0.2),
+          color: quantity > 0
+              ? color.withOpacity(0.5)
+              : Colors.grey.withOpacity(0.2),
           width: 1.5,
         ),
       ),
@@ -520,7 +542,9 @@ class _InventoryButtonState extends State<_InventoryButton> {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: quantity > 0 ? color.withOpacity(0.3) : Colors.grey.withOpacity(0.2),
+              color: quantity > 0
+                  ? color.withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.2),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
@@ -537,7 +561,7 @@ class _InventoryButtonState extends State<_InventoryButton> {
       ),
     );
   }
-  
+
   Widget _buildUpgradeStatus(String name, bool hasUpgrade) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 2),
@@ -546,7 +570,9 @@ class _InventoryButtonState extends State<_InventoryButton> {
         color: Colors.black.withOpacity(0.3),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: hasUpgrade ? Colors.green.withOpacity(0.5) : Colors.grey.withOpacity(0.2),
+          color: hasUpgrade
+              ? Colors.green.withOpacity(0.5)
+              : Colors.grey.withOpacity(0.2),
           width: 1.5,
         ),
       ),
